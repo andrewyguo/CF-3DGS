@@ -657,6 +657,7 @@ class CFGaussianTrainer(GaussianTrainer):
         pose_path = os.path.join(result_path, 'ep00_init.pth')
         poses = torch.load(pose_path)
         poses_pred = poses['poses_pred'].inverse().cpu()
+        import IPython; IPython.embed() 
         poses_gt_c2w = poses['poses_gt'].inverse().cpu()
         poses_gt = poses_gt_c2w[:len(poses_pred)].clone()
         # align scale first (we do this because scale differennt a lot)

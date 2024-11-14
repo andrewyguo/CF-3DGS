@@ -20,7 +20,7 @@ from scene import Scene
 from gaussian_renderer import render
 from arguments import ModelParams, PipelineParams, OptimizationParams
 from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON
-from scene.dataset_readers import sceneLoadTypeCallbacks, CameraInfo, read_intrinsics_binary
+from scene.dataset_readers import sceneLoadTypeCallbacks, CameraInfo, read_intrinsics_binary, read_intrinsics_text
 import glob
 from copy import copy
 import open3d as o3d
@@ -232,7 +232,7 @@ class GaussianTrainer(object):
             self.seq_len = len(self.data)
         elif self.model_cfg.data_type == "custom":
             source_path = self.model_cfg.source_path
-            cameras_intrinsic_file = os.path.join(source_path, "sparse/0", "cameras.bin")
+            cameras_intrinsic_file = os.path.join(source_path, "sparse/0", "cameras.txt")
             max_frames = 300
             # if os.path.exists(cameras_intrinsic_file):
             #     images = sorted(glob.glob(os.path.join(source_path, "images", "*.jpg")))
@@ -248,14 +248,16 @@ class GaussianTrainer(object):
             #         [[focal_length_x, 0, width/2], [0, focal_length_y, height/2], [0, 0, 1]])
             #     self.intrinsic = intr_mat
             # else:
-            images = sorted(glob.glob(os.path.join(source_path, "images/*.jpg")))
+            images = sorted(glob.glob(os.path.join(source_path, "images/*.png")))
+            print("source path: ", source_path)
             if len(images) > max_frames:
                 interval = len(images) // max_frames
                 images = images[::interval]
             print("Total images: ", len(images))
             width, height = Image.open(images[0]).size
             if os.path.exists(cameras_intrinsic_file):
-                cam_intrinsics = read_intrinsics_binary(cameras_intrinsic_file)
+                # cam_intrinsics = read_intrinsics_binary(cameras_intrinsic_file)
+                cam_intrinsics = read_intrinsics_text(cameras_intrinsic_file)
                 intr = cam_intrinsics[1]
                 focal_length_x = intr.params[0]
                 focal_length_y = intr.params[1]
@@ -279,7 +281,7 @@ class GaussianTrainer(object):
             
             intr_mat[:2, :] /= 2
             self.intrinsic = intr_mat
-
+            print(f"self.intrinsic: {self.intrinsic}")
 
             sample_rate = 8
             ids = np.arange(len(images))
