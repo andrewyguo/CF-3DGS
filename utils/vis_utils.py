@@ -13,6 +13,9 @@ from matplotlib import tight_layout
 import copy
 from evo.core.trajectory import PosePath3D, PoseTrajectory3D
 from evo.main_ape import ape
+from evo.tools.settings import SETTINGS
+SETTINGS.plot_backend = "Agg"
+
 from evo.tools import plot
 from evo.core import sync
 from evo.tools import file_interface

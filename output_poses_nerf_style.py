@@ -47,6 +47,8 @@ def save_poses_to_json(result_path, cameras_path, output_path):
     # Load poses
     pose_path = os.path.join(result_path, 'ep00_init.pth')
     poses = torch.load(pose_path)
+    import IPython; IPython.embed(); exit(1)
+
     poses_pred = poses['poses_pred'].inverse().cpu().numpy()
 
     # Load camera intrinsics

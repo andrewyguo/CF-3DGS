@@ -279,14 +279,15 @@ class GaussianTrainer(object):
                 width = width // 2
                 height = height // 2
             
-            intr_mat[:2, :] /= 2
+                intr_mat[:2, :] /= 2
             self.intrinsic = intr_mat
             print(f"self.intrinsic: {self.intrinsic}")
 
             sample_rate = 8
             ids = np.arange(len(images))
             self.i_test = ids[int(sample_rate/2)::sample_rate]
-            self.i_train = np.array([i for i in ids if i not in self.i_test])
+            # self.i_train = np.array([i for i in ids if i not in self.i_test])
+            self.i_train = np.array(ids) # andrew change - get all poses. Eval with nerfacto 
             if "eval" in self.model_cfg.mode:
                 self.data = [images[i] for i in self.i_test]
             else:
