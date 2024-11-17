@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import argparse
 
-def load_camera_intrinsics(cameras_path):
+def load_camera_intrinsics_txt(cameras_path):
     """Load camera intrinsics from a cameras.txt file."""
     with open(cameras_path, 'r') as f:
         lines = f.readlines()
@@ -42,17 +42,27 @@ def load_camera_intrinsics(cameras_path):
 
     raise ValueError("No valid camera intrinsics found in the file.")
 
-def save_poses_to_json(result_path, cameras_path, output_path):
+def load_camera_intrinsics_json(json_path):
+    """Load camera intrinsics from a JSON file."""
+    with open(json_path, 'r') as f:
+        intrinsics = json.load(f)
+
+    # Check if the required keys exist
+    required_keys = ['w', 'h', 'fl_x', 'fl_y', 'cx', 'cy', 'k1', 'k2', 'p1', 'p2']
+    if all(key in intrinsics for key in required_keys):
+        return intrinsics
+    else:
+        raise ValueError("No intrinsics found in the specified camera intrinsics JSON file.")
+
+def save_poses_to_json(pose_path, cameras_path, output_path):
     """Save poses and camera intrinsics to a NeRF-style transforms.json file."""
     # Load poses
-    pose_path = os.path.join(result_path, 'ep00_init.pth')
     poses = torch.load(pose_path)
-    import IPython; IPython.embed(); exit(1)
 
     poses_pred = poses['poses_pred'].inverse().cpu().numpy()
 
     # Load camera intrinsics
-    intrinsics = load_camera_intrinsics(cameras_path)
+    intrinsics = load_camera_intrinsics_json(cameras_path)
 
     # Create the NeRF-style JSON structure
     transforms = intrinsics
@@ -74,10 +84,10 @@ def save_poses_to_json(result_path, cameras_path, output_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Save poses and camera intrinsics to a NeRF-style transforms.json file.")
-    parser.add_argument("-r", "--result_path", required=True, help="Path to the result directory containing ep00_init.pth")
-    parser.add_argument("-c", "--cameras_path", required=True, help="Path to the cameras.txt file")
+    parser.add_argument("-p", "--pose_path", required=True, help="Path to the result directory containing ep00_init.pth")
+    parser.add_argument("-c", "--cameras_path", required=True, help="Path to json file containing camera intrinsics")
     parser.add_argument("-o", "--output_path", required=True, help="Path to save the output transforms.json file")
 
     args = parser.parse_args()
 
-    save_poses_to_json(args.result_path, args.cameras_path, args.output_path)
+    save_poses_to_json(args.pose_path, args.cameras_path, args.output_path)
